@@ -1,0 +1,68 @@
+version: '3'
+
+services:
+  orchestrator:
+    image: mcp-orchestrator:latest
+    build: ./mcp-orchestrator
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config:/app/config
+    networks:
+      - mcp-network
+
+  memory:
+    image: mcp-memory-blockchain:latest
+    build: ./mcp-memory-blockchain
+    ports:
+      - "3001:3001"
+    volumes:
+      - memory_data:/app/data
+    networks:
+      - mcp-network
+
+  time-precision:
+    image: mcp-time-precision:latest
+    build: ./mcp-time-precision
+    ports:
+      - "3002:3002"
+    networks:
+      - mcp-network
+      
+  # Optional services that can be uncommented as needed
+  # comfyui:
+  #   image: mcp-comfyui:latest
+  #   build: ./mcp-comfyui
+  #   ports:
+  #     - "3003:3003"
+  #   volumes:
+  #     - comfyui_data:/app/data
+  #   networks:
+  #     - mcp-network
+  
+  # portainer-bridge:
+  #   image: mcp-portainer-bridge:latest
+  #   build: ./mcp-portainer-bridge
+  #   ports:
+  #     - "3004:3004"
+  #   volumes:
+  #     - ./config:/app/config
+  #   networks:
+  #     - mcp-network
+
+networks:
+  mcp-network:
+
+volumes:
+  memory_data:
+    driver: zfs
+    driver_opts:
+      type: 'volume'
+      device: 'lilith-pool/docker/memory'
+      o: 'compression=lz4'
+  # comfyui_data:
+  #   driver: zfs
+  #   driver_opts:
+  #     type: 'volume'
+  #     device: 'lilith-pool/docker/comfyui'
+  #     o: 'compression=lz4'
