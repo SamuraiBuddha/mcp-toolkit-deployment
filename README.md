@@ -1,12 +1,25 @@
-# MCP Toolkit Deployment for Lilith
+# EVA Network MCP Toolkit Deployment
 
-Deployment files for setting up the MCP toolkit on Lilith (EVA network node) for connecting multiple Claude instances.
+Deployment files for setting up the MCP toolkit across all nodes in the EVA network (Lilith, Caspar, Balthazar).
+
+## Available Configurations
+
+- `config/claude_desktop_config.json` - Configuration for Lilith (192.168.50.10)
+- `config/claude_desktop_config_caspar.json` - Configuration for Caspar (192.168.50.21)
+- `config/claude_desktop_config_balthazar.json` - Configuration for Balthazar (192.168.50.20)
 
 ## Quick Start
 
-1. SSH into Lilith:
+1. SSH into the target EVA node:
    ```bash
+   # For Lilith
    ssh samuraibuddha@192.168.50.10
+   
+   # For Caspar (note the port)
+   ssh samuraibuddha@192.168.50.21 -p 9222
+   
+   # For Balthazar
+   ssh samuraibuddha@192.168.50.20
    ```
 
 2. Clone this repository:
@@ -15,15 +28,20 @@ Deployment files for setting up the MCP toolkit on Lilith (EVA network node) for
    cd mcp-toolkit-deployment
    ```
 
-3. Make the setup script executable:
+3. Make the deployment script executable:
    ```bash
-   chmod +x setup.sh
+   chmod +x deploy.sh
    ```
 
-4. Run the setup script:
+4. Run the deployment script with the appropriate node name:
    ```bash
-   ./setup.sh
+   ./deploy.sh [lilith|caspar|balthazar]
    ```
+
+This will:
+- Copy the appropriate configuration file to the Claude Desktop config location
+- Pull the latest Docker images
+- Start all the MCP Toolkit services
 
 ## Manual Setup
 
@@ -38,7 +56,7 @@ If you prefer to set up components manually:
 
 2. Create ZFS datasets if needed:
    ```bash
-   sudo zfs create -o compression=lz4 lilith-pool/docker/memory
+   sudo zfs create -o compression=lz4 [pool-name]/docker/memory
    ```
 
 3. Deploy with Docker Compose:
@@ -47,42 +65,45 @@ If you prefer to set up components manually:
    docker-compose up -d
    ```
 
-## Connecting Claude Desktop
+## Services
 
-Update your Claude Desktop configuration to point to Lilith's MCP services:
-
-1. Copy the `config/claude_desktop_config.json` to your Claude Desktop installation
-2. Adjust IP addresses and ports if necessary
-3. Restart Claude Desktop
-
-## Additional MCPs
-
-The docker-compose.yml includes commented sections for additional MCPs:
+The MCP Toolkit includes these services:
+- MCP Orchestrator
+- MCP Memory
+- MCP Time Precision
 - ComfyUI
 - Portainer Bridge
+- Neo4j
+- MongoDB
+- Redis
+- MinIO
+- Traefik
 
-Uncomment these sections to deploy these additional services as needed.
+## Architecture
 
-## Memory Migration
+Each EVA node runs an identical stack with node-specific configurations.
 
-To migrate memory from an existing Claude Desktop to Lilith:
+- **Lilith (192.168.50.10)**: Primary AI NAS
+- **Caspar (192.168.50.21)**: Bridge node 
+- **Balthazar (192.168.50.20)**: GPU node
+- **Adam (192.168.50.11)**: Business storage (no MCP Toolkit)
+- **Melchior (192.168.50.30)**: Development workstation
 
-```bash
-# On your existing Claude Desktop machine
-curl -X POST http://localhost:3001/memory/export > memory_export.json
+## Accessing Services
 
-# Transfer the file to Lilith
-
-# On Lilith
-curl -X POST http://localhost:3001/memory/import -H "Content-Type: application/json" -d @memory_export.json
-```
+Once deployed, services can be accessed at:
+- Orchestrator: http://[node-ip]:3000
+- Memory: http://[node-ip]:3001
+- Time Precision: http://[node-ip]:3002
+- ComfyUI: http://[node-ip]:3003
+- Portainer Bridge: http://[node-ip]:3004
 
 ## Connecting Multiple Claude Instances
 
-Configure each Claude Desktop to connect to Lilith's MCP services by updating their config files with Lilith's IP address (192.168.50.10) and the appropriate ports.
+Configure each Claude Desktop to connect to the appropriate EVA node's MCP services by using the config files provided in this repository.
 
 ## Troubleshooting
 
 - If containers fail to start, check Docker logs: `docker-compose logs`
-- Verify ZFS datasets are created correctly: `zfs list | grep lilith-pool`
+- Verify ZFS datasets are created correctly: `zfs list | grep [pool-name]`
 - Ensure ports are accessible: `sudo netstat -tulpn | grep LISTEN`
