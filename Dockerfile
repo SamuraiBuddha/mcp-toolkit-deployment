@@ -26,12 +26,8 @@ RUN git clone https://github.com/SamuraiBuddha/mcp-time-precision.git /tmp/mcp-t
     pip install -e . && \
     cd /app
 
-# Install Node.js-based MCPs
-RUN npm install -g \
-    @modelcontextprotocol/server-filesystem \
-    @modelcontextprotocol/server-github \
-    @modelcontextprotocol/server-docker \
-    @modelcontextprotocol/server-sequential-thinking
+# NOTE: Node.js MCPs removed temporarily - need to verify correct package names
+# The orchestrator proxy can still discover and route to MCPs installed elsewhere
 
 # Copy configuration
 COPY config/registry.json /app/config/
