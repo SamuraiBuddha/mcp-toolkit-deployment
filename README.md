@@ -1,71 +1,101 @@
-# EVA Network MCP Toolkit Deployment
+# MCP Toolkit Deployment
 
-Deployment files for setting up the MCP toolkit across all nodes in the EVA network (Lilith, Caspar, Balthazar).
+This repository contains configurations for deploying the Model Context Protocol (MCP) toolkit across the EVA Network infrastructure. The toolkit includes orchestrator, memory, time precision, and other essential MCP services.
 
-## Available Configurations
+## 🔄 Host Network Mode Update
 
-- `config/claude_desktop_config.json` - Configuration for Lilith (192.168.50.10)
-- `config/claude_desktop_config_caspar.json` - Configuration for Caspar (192.168.50.21)
-- `config/claude_desktop_config_balthazar.json` - Configuration for Balthazar (192.168.50.20)
+The Docker Compose configuration now uses **host network mode** for all services to ensure seamless connectivity between Lilith (NAS) and the MAGI nodes (Melchior, Balthazar, Caspar).
 
-## Quick Start
+### Why Host Network Mode?
 
-1. SSH into the target EVA node:
+Host network mode eliminates bridge network isolation issues that were preventing proper communication between the NAS containers and remote nodes. With host networking:
+
+- All container ports are directly exposed on the host's network interface
+- No port mapping/translation is needed
+- Services correctly announce the actual host IP
+- Inter-container communication is simplified
+- Performance is improved by removing bridge network overhead
+
+## 🖥️ MAGI Node Configuration
+
+### Caspar and Balthazar Setup
+
+1. Copy the appropriate config file to your Claude Desktop config location:
+   - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+   - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - Linux: `~/.config/claude/claude_desktop_config.json`
+
+2. Ensure SSH key authentication is set up:
    ```bash
-   # For Lilith
-   ssh samuraibuddha@192.168.50.10
+   # Generate ED25519 key if needed
+   ssh-keygen -t ed25519 -C "samuraibuddha@[machine-name]"
    
-   # For Caspar (note the port)
-   ssh samuraibuddha@192.168.50.21 -p 9222
-   
-   # For Balthazar
-   ssh samuraibuddha@192.168.50.20
+   # Copy key to Lilith (replace with your actual path)
+   ssh-copy-id -i C:\Users\SamuraiBuddha\.ssh\id_ed25519 samuraibuddha@192.168.50.10
    ```
 
-2. Clone this repository:
+3. Test the SSH connection:
+   ```bash
+   ssh samuraibuddha@192.168.50.10 echo "Connection successful"
+   ```
+
+4. Restart Claude Desktop to apply changes
+
+## 🚀 Deployment on Lilith
+
+1. Clone this repository:
    ```bash
    git clone https://github.com/SamuraiBuddha/mcp-toolkit-deployment.git
    cd mcp-toolkit-deployment
    ```
 
-3. Make the deployment script executable:
+2. Deploy the stack:
    ```bash
-   chmod +x deploy.sh
-   ```
-
-4. Run the deployment script with the appropriate node name:
-   ```bash
-   ./deploy.sh [lilith|caspar|balthazar]
-   ```
-
-This will:
-- Copy the appropriate configuration file to the Claude Desktop config location
-- Pull the latest Docker images
-- Start all the MCP Toolkit services
-
-## Manual Setup
-
-If you prefer to set up components manually:
-
-1. Clone the necessary repositories:
-   ```bash
-   git clone https://github.com/SamuraiBuddha/mcp-orchestrator.git
-   git clone https://github.com/SamuraiBuddha/mcp-memory-blockchain.git
-   git clone https://github.com/SamuraiBuddha/mcp-time-precision.git
-   ```
-
-2. Create ZFS datasets if needed:
-   ```bash
-   sudo zfs create -o compression=lz4 [pool-name]/docker/memory
-   ```
-
-3. Deploy with Docker Compose:
-   ```bash
-   docker-compose build
+   docker-compose down
    docker-compose up -d
    ```
 
-## Services
+3. Verify services are running:
+   ```bash
+   docker-compose ps
+   ```
+
+## 🔍 Troubleshooting
+
+If you encounter issues:
+
+1. Check container logs:
+   ```bash
+   docker-compose logs mcp-orchestrator
+   ```
+
+2. Verify SSH connection from MAGI nodes:
+   ```bash
+   # From Caspar/Balthazar
+   ssh -i C:\Users\SamuraiBuddha\.ssh\id_ed25519 samuraibuddha@192.168.50.10 docker ps
+   ```
+
+3. Check network connectivity:
+   ```bash
+   # From MAGI nodes
+   ping 192.168.50.10
+   ```
+
+4. Restart Docker service on Lilith if needed:
+   ```bash
+   sudo systemctl restart docker
+   docker-compose up -d
+   ```
+
+## 🔄 System Architecture
+
+- **Lilith (192.168.50.10)**: Primary AI/Dev NAS with all MCP services
+- **Adam (192.168.50.11)**: Business storage NAS
+- **Balthazar (192.168.50.20)**: GPU compute node
+- **Caspar (192.168.50.21)**: Bridge node
+- **Melchior (192.168.50.30)**: Development workstation
+
+## Available Services
 
 The MCP Toolkit includes these services:
 - MCP Orchestrator
@@ -78,32 +108,3 @@ The MCP Toolkit includes these services:
 - Redis
 - MinIO
 - Traefik
-
-## Architecture
-
-Each EVA node runs an identical stack with node-specific configurations.
-
-- **Lilith (192.168.50.10)**: Primary AI NAS
-- **Caspar (192.168.50.21)**: Bridge node 
-- **Balthazar (192.168.50.20)**: GPU node
-- **Adam (192.168.50.11)**: Business storage (no MCP Toolkit)
-- **Melchior (192.168.50.30)**: Development workstation
-
-## Accessing Services
-
-Once deployed, services can be accessed at:
-- Orchestrator: http://[node-ip]:3000
-- Memory: http://[node-ip]:3001
-- Time Precision: http://[node-ip]:3002
-- ComfyUI: http://[node-ip]:3003
-- Portainer Bridge: http://[node-ip]:3004
-
-## Connecting Multiple Claude Instances
-
-Configure each Claude Desktop to connect to the appropriate EVA node's MCP services by using the config files provided in this repository.
-
-## Troubleshooting
-
-- If containers fail to start, check Docker logs: `docker-compose logs`
-- Verify ZFS datasets are created correctly: `zfs list | grep [pool-name]`
-- Ensure ports are accessible: `sudo netstat -tulpn | grep LISTEN`
