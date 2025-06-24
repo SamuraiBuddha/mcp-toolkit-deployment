@@ -1,110 +1,187 @@
-# MCP Toolkit Deployment
+# MCP Toolkit Deployment with Orchestrator Proxy 🚀
 
-This repository contains configurations for deploying the Model Context Protocol (MCP) toolkit across the EVA Network infrastructure. The toolkit includes orchestrator, memory, time precision, and other essential MCP services.
+**Simplified deployment using MCP Orchestrator Proxy - all MCPs managed by a single container!**
 
-## 🔄 Host Network Mode Update
+## Architecture Overview
 
-The Docker Compose configuration now uses **host network mode** for all services to ensure seamless connectivity between Lilith (NAS) and the MAGI nodes (Melchior, Balthazar, Caspar).
+This deployment uses the **MCP Orchestrator Proxy** to manage all MCP servers as subprocesses within a single container. This provides:
 
-### Why Host Network Mode?
+- **Unified Management**: One container manages all MCPs
+- **On-Demand Spawning**: MCPs start only when needed
+- **Resource Efficiency**: Unused MCPs don't consume resources
+- **Process Control**: Automatic restart on failures
+- **Simplified Configuration**: Single `registry.json` file
 
-Host network mode eliminates bridge network isolation issues that were preventing proper communication between the NAS containers and remote nodes. With host networking:
+## What's Included
 
-- All container ports are directly exposed on the host's network interface
-- No port mapping/translation is needed
-- Services correctly announce the actual host IP
-- Inter-container communication is simplified
-- Performance is improved by removing bridge network overhead
+### Core Services
+- **MCP Orchestrator Proxy**: Manages all MCP servers
+- **Neo4j**: Graph database for memory system
+- **MongoDB**: Document storage
+- **Redis**: Caching layer
+- **Portainer**: Container management UI (optional)
 
-## 🖥️ MAGI Node Configuration
+### Managed MCPs
+- **Memory**: Blockchain-backed knowledge graph (Neo4j)
+- **Time Precision**: Microsecond-accurate time operations
+- **Filesystem**: File and directory operations
+- **GitHub**: Repository and code management
+- **Docker**: Container management
+- **Sequential Thinking**: Step-by-step problem solving
+- **Freshbooks**: Blockchain accounting
 
-### Caspar and Balthazar Setup
+## Quick Start
 
-1. Copy the appropriate config file to your Claude Desktop config location:
-   - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-   - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - Linux: `~/.config/claude/claude_desktop_config.json`
+### 1. Clone the Repository
+```bash
+git clone https://github.com/SamuraiBuddha/mcp-toolkit-deployment.git
+cd mcp-toolkit-deployment
+```
 
-2. Ensure SSH key authentication is set up:
-   ```bash
-   # Generate ED25519 key if needed
-   ssh-keygen -t ed25519 -C "samuraibuddha@[machine-name]"
-   
-   # Copy key to Lilith (replace with your actual path)
-   ssh-copy-id -i C:\Users\SamuraiBuddha\.ssh\id_ed25519 samuraibuddha@192.168.50.10
-   ```
+### 2. Configure Environment
+```bash
+cp .env.example .env
+# Edit .env with your values:
+# - NEO4J_PASSWORD
+# - MONGO_PASSWORD
+# - GITHUB_TOKEN
+# - COMFYUI_URL (optional)
+```
 
-3. Test the SSH connection:
-   ```bash
-   ssh samuraibuddha@192.168.50.10 echo "Connection successful"
-   ```
+### 3. Deploy
+```bash
+docker-compose up -d
+```
 
-4. Restart Claude Desktop to apply changes
+### 4. Configure Claude Desktop
 
-## 🚀 Deployment on Lilith
+Add to your Claude Desktop config (`claude_desktop_config.json`):
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/SamuraiBuddha/mcp-toolkit-deployment.git
-   cd mcp-toolkit-deployment
-   ```
+```json
+{
+  "mcpServers": {
+    "orchestrator": {
+      "command": "docker",
+      "args": ["exec", "-i", "mcp-orchestrator-proxy", "python", "-m", "mcp_orchestrator_proxy"],
+      "env": {}
+    }
+  }
+}
+```
 
-2. Deploy the stack:
-   ```bash
-   docker-compose down
-   docker-compose up -d
-   ```
+## How It Works
 
-3. Verify services are running:
-   ```bash
-   docker-compose ps
-   ```
+1. **Claude** sends requests to the Orchestrator Proxy
+2. **Orchestrator** determines which MCP to use based on the request
+3. **Proxy** spawns the MCP if not already running
+4. **MCP** executes the tool and returns results
+5. **Proxy** manages MCP lifecycle (idle timeout, restart on failure)
 
-## 🔍 Troubleshooting
+## Configuration
 
-If you encounter issues:
+### Registry Configuration
 
-1. Check container logs:
-   ```bash
-   docker-compose logs mcp-orchestrator
-   ```
+Edit `config/registry.json` to:
+- Add new MCPs
+- Modify tool descriptions
+- Update keywords for better discovery
+- Configure environment variables
 
-2. Verify SSH connection from MAGI nodes:
-   ```bash
-   # From Caspar/Balthazar
-   ssh -i C:\Users\SamuraiBuddha\.ssh\id_ed25519 samuraibuddha@192.168.50.10 docker ps
-   ```
+### Adding New MCPs
 
-3. Check network connectivity:
-   ```bash
-   # From MAGI nodes
-   ping 192.168.50.10
-   ```
+1. Add the MCP to the Dockerfile:
+```dockerfile
+RUN pip install your-new-mcp  # For Python MCPs
+# OR
+RUN npm install -g @your/new-mcp  # For Node.js MCPs
+```
 
-4. Restart Docker service on Lilith if needed:
-   ```bash
-   sudo systemctl restart docker
-   docker-compose up -d
-   ```
+2. Add configuration to `config/registry.json`:
+```json
+{
+  "mcps": {
+    "your-mcp": {
+      "description": "What it does",
+      "command": "python",
+      "args": ["-m", "your_mcp"],
+      "tools": {
+        // Tool definitions
+      }
+    }
+  }
+}
+```
 
-## 🔄 System Architecture
+3. Rebuild and restart:
+```bash
+docker-compose build
+docker-compose up -d
+```
 
-- **Lilith (192.168.50.10)**: Primary AI/Dev NAS with all MCP services
-- **Adam (192.168.50.11)**: Business storage NAS
-- **Balthazar (192.168.50.20)**: GPU compute node
-- **Caspar (192.168.50.21)**: Bridge node
-- **Melchior (192.168.50.30)**: Development workstation
+## Advanced Usage
 
-## Available Services
+### Scaling
+- Adjust resource limits in `docker-compose.yml`
+- Configure MCP spawn limits in orchestrator settings
+- Use external databases for production
 
-The MCP Toolkit includes these services:
-- MCP Orchestrator
-- MCP Memory
-- MCP Time Precision
-- ComfyUI
-- Portainer Bridge
-- Neo4j
-- MongoDB
-- Redis
-- MinIO
-- Traefik
+### Monitoring
+- Access Portainer at http://localhost:9443
+- Check orchestrator logs: `docker logs mcp-orchestrator-proxy`
+- Monitor resource usage: `docker stats`
+
+### Troubleshooting
+
+**MCP not starting?**
+```bash
+docker exec mcp-orchestrator-proxy python -m your_mcp
+```
+
+**Connection issues?**
+```bash
+docker exec -it mcp-orchestrator-proxy bash
+# Test connections to services
+```
+
+**Registry changes not taking effect?**
+```bash
+docker-compose restart mcp-orchestrator-proxy
+```
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| NEO4J_PASSWORD | Neo4j password | secure_password_here |
+| MONGO_PASSWORD | MongoDB password | secure_password |
+| GITHUB_TOKEN | GitHub API token | (required) |
+| COMFYUI_URL | ComfyUI server URL | http://localhost:8188 |
+
+## Architecture Benefits
+
+### vs Individual Containers
+- **Before**: 7+ containers, each running an MCP
+- **After**: 1 orchestrator container managing all MCPs
+- **Result**: Lower resource usage, simpler management
+
+### Process Management
+- MCPs spawn on first use
+- Automatic cleanup after idle timeout
+- Restart on failure with backoff
+- Resource limits per MCP
+
+## Contributing
+
+To add new MCPs or improve the deployment:
+1. Fork the repository
+2. Add your MCP to Dockerfile and registry.json
+3. Test thoroughly
+4. Submit a pull request
+
+## License
+
+MIT License - Perfect for your NAS deployment!
+
+---
+
+*For the standard discovery-only orchestrator (Claude Desktop with existing MCPs), see [mcp-orchestrator](https://github.com/SamuraiBuddha/mcp-orchestrator)*
