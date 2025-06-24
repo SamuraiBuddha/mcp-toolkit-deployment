@@ -1,0 +1,210 @@
+{
+  "mcps": {
+    "memory": {
+      "description": "Persistent memory and knowledge graph management using Neo4j",
+      "keywords": ["remember", "store", "recall", "knowledge", "graph", "blockchain"],
+      "categories": ["memory", "database", "blockchain"],
+      "command": "python",
+      "args": ["-m", "mcp_memory_blockchain"],
+      "env": {
+        "NEO4J_URI": "${NEO4J_URI}",
+        "NEO4J_USER": "${NEO4J_USER}",
+        "NEO4J_PASSWORD": "${NEO4J_PASSWORD}"
+      },
+      "tools": {
+        "create_entities": {
+          "description": "Create new entities in the knowledge graph",
+          "keywords": ["new", "add", "create"]
+        },
+        "search_nodes": {
+          "description": "Search for information in the knowledge graph",
+          "keywords": ["find", "query", "search", "lookup"]
+        },
+        "add_observations": {
+          "description": "Add observations to existing entities",
+          "keywords": ["update", "append", "observe"]
+        },
+        "open_nodes": {
+          "description": "Open specific nodes by name",
+          "keywords": ["get", "retrieve", "load"]
+        },
+        "delete_entities": {
+          "description": "Delete entities from the knowledge graph",
+          "keywords": ["remove", "delete", "clear"]
+        }
+      }
+    },
+    "time-precision": {
+      "description": "High-precision time operations with microsecond accuracy",
+      "keywords": ["time", "timestamp", "date", "clock", "precision", "microsecond", "epoch"],
+      "categories": ["time", "utility"],
+      "command": "python",
+      "args": ["-m", "mcp_time_precision"],
+      "tools": {
+        "get_precise_time": {
+          "description": "Get current time with microsecond precision",
+          "keywords": ["now", "current", "time"]
+        },
+        "get_epoch_micros": {
+          "description": "Get Unix epoch time in microseconds",
+          "keywords": ["epoch", "unix", "timestamp"]
+        },
+        "get_instance_info": {
+          "description": "Get information about this MCP instance",
+          "keywords": ["info", "version", "instance"]
+        },
+        "convert_time_precision": {
+          "description": "Convert between different time precision formats",
+          "keywords": ["convert", "format", "transform"]
+        }
+      }
+    },
+    "filesystem": {
+      "description": "File system operations and management",
+      "keywords": ["file", "directory", "read", "write", "folder", "disk"],
+      "categories": ["filesystem", "storage"],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/storage"],
+      "tools": {
+        "read_file": {
+          "description": "Read contents of a file",
+          "keywords": ["open", "load", "get", "cat"]
+        },
+        "write_file": {
+          "description": "Write content to a file",
+          "keywords": ["save", "create", "put", "write"]
+        },
+        "list_directory": {
+          "description": "List contents of a directory",
+          "keywords": ["ls", "dir", "show", "list"]
+        },
+        "create_directory": {
+          "description": "Create a new directory",
+          "keywords": ["mkdir", "new", "folder"]
+        },
+        "delete_file": {
+          "description": "Delete a file",
+          "keywords": ["rm", "remove", "delete"]
+        },
+        "move_file": {
+          "description": "Move or rename a file",
+          "keywords": ["mv", "rename", "move"]
+        }
+      }
+    },
+    "github": {
+      "description": "GitHub repository and code management",
+      "keywords": ["git", "code", "repository", "commit", "pull request", "issue"],
+      "categories": ["code", "vcs"],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "tools": {
+        "create_repository": {
+          "description": "Create a new GitHub repository",
+          "keywords": ["new", "init", "start"]
+        },
+        "list_repositories": {
+          "description": "List all repositories for the authenticated user",
+          "keywords": ["show", "get", "repos"]
+        },
+        "create_issue": {
+          "description": "Create a new issue in a repository",
+          "keywords": ["bug", "feature", "task"]
+        },
+        "create_pull_request": {
+          "description": "Create a pull request",
+          "keywords": ["pr", "merge", "review"]
+        },
+        "get_file_contents": {
+          "description": "Get file contents from a repository",
+          "keywords": ["read", "download", "fetch"]
+        },
+        "create_or_update_file": {
+          "description": "Create or update a file in a repository",
+          "keywords": ["write", "upload", "commit"]
+        }
+      }
+    },
+    "docker": {
+      "description": "Docker container and image management",
+      "keywords": ["container", "deploy", "run", "kubernetes", "compose"],
+      "categories": ["devops", "infrastructure"],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
+      "env": {
+        "DOCKER_HOST": "unix:///var/run/docker.sock"
+      },
+      "tools": {
+        "list_containers": {
+          "description": "List all Docker containers",
+          "keywords": ["ps", "show", "containers"]
+        },
+        "run_container": {
+          "description": "Run a new Docker container",
+          "keywords": ["start", "create", "launch", "run"]
+        },
+        "stop_container": {
+          "description": "Stop a running container",
+          "keywords": ["stop", "halt", "kill"]
+        },
+        "remove_container": {
+          "description": "Remove a container",
+          "keywords": ["rm", "delete", "remove"]
+        },
+        "list_images": {
+          "description": "List Docker images",
+          "keywords": ["images", "list"]
+        },
+        "pull_image": {
+          "description": "Pull a Docker image",
+          "keywords": ["pull", "download", "fetch"]
+        }
+      }
+    },
+    "sequential-thinking": {
+      "description": "Step-by-step problem solving and analysis",
+      "keywords": ["think", "analyze", "solve", "reason", "step", "problem"],
+      "categories": ["reasoning", "analysis"],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "tools": {
+        "think_through": {
+          "description": "Break down a complex problem step by step",
+          "keywords": ["analyze", "decompose", "solve", "think"]
+        }
+      }
+    },
+    "freshbooks": {
+      "description": "Blockchain-powered accounting and financial management",
+      "keywords": ["invoice", "payment", "expense", "accounting", "finance", "blockchain", "audit", "tax"],
+      "categories": ["finance", "blockchain", "accounting"],
+      "command": "python",
+      "args": ["-m", "mcp_freshbooks_blockchain"],
+      "tools": {
+        "create_invoice": {
+          "description": "Create a new invoice with blockchain tracking",
+          "keywords": ["bill", "charge", "invoice"]
+        },
+        "list_invoices": {
+          "description": "List invoices with blockchain verification",
+          "keywords": ["show", "get", "unpaid"]
+        },
+        "record_payment": {
+          "description": "Record a payment with blockchain confirmation",
+          "keywords": ["paid", "received", "payment"]
+        },
+        "add_expense": {
+          "description": "Track an expense with immutable blockchain record",
+          "keywords": ["spend", "cost", "expense"]
+        },
+        "generate_report": {
+          "description": "Generate financial reports with blockchain verification",
+          "keywords": ["report", "profit", "loss", "tax"]
+        }
+      }
+    }
+  }
+}
