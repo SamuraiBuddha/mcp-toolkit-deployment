@@ -1,13 +1,8 @@
 {
-  "mcpServers": {
-    "orchestrator": {
-      "command": "ssh",
-      "args": [
-        "-i", "C:\\Users\\SamuraiBuddha\\.ssh\\id_ed25519",
-        "samuraibuddha@192.168.50.10",
-        "docker", "exec", "-i", "mcp-orchestrator", "node", "/app/server.js"
-      ],
-      "cwd": "C:\\Users\\SamuraiBuddha\\Documents"
-    }
-  }
+  "path": "claude_desktop_config.json",
+  "repo": "mcp-toolkit-deployment",
+  "owner": "SamuraiBuddha",
+  "branch": "main",
+  "content": "{\n  \"mcpServers\": {\n    \"lilith_dev\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"//192.168.50.10/development\"\n      ]\n    },\n    \"lilith_ai\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"//192.168.50.10/ai-models\"\n      ]\n    },\n    \"lilith_media\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"//192.168.50.10/media\"\n      ]\n    },\n    \"lilith_backups\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"//192.168.50.10/backups\"\n      ]\n    },\n    \"current_nas\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"//ebic403edge/public\"\n      ]\n    },\n    \"old_nas\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"//403Edge/Public\"\n      ]\n    }\n  }\n}",
+  "message": "Add Lilith network shares config and consolidate configs to main directory"
 }
