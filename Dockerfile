@@ -22,15 +22,10 @@ RUN git clone https://github.com/SamuraiBuddha/mcp-orchestrator-proxy.git /app &
     pip install -e .
 
 # Install Python-based MCPs from GitHub
-# NOTE: mcp-memory-blockchain temporarily removed - will be added back later
+# NOTE: Blockchain MCPs temporarily removed - will be added back later
 
 RUN git clone https://github.com/SamuraiBuddha/mcp-time-precision.git /tmp/mcp-time-precision && \
     cd /tmp/mcp-time-precision && \
-    pip install -e . && \
-    cd /app
-
-RUN git clone https://github.com/SamuraiBuddha/mcp-freshbooks-blockchain.git /tmp/mcp-freshbooks-blockchain && \
-    cd /tmp/mcp-freshbooks-blockchain && \
     pip install -e . && \
     cd /app
 
