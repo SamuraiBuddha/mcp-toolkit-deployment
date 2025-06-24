@@ -1,39 +1,5 @@
 {
   "mcps": {
-    "memory": {
-      "description": "Persistent memory and knowledge graph management using Neo4j",
-      "keywords": ["remember", "store", "recall", "knowledge", "graph", "blockchain"],
-      "categories": ["memory", "database", "blockchain"],
-      "command": "python",
-      "args": ["-m", "mcp_memory_blockchain"],
-      "env": {
-        "NEO4J_URI": "${NEO4J_URI}",
-        "NEO4J_USER": "${NEO4J_USER}",
-        "NEO4J_PASSWORD": "${NEO4J_PASSWORD}"
-      },
-      "tools": {
-        "create_entities": {
-          "description": "Create new entities in the knowledge graph",
-          "keywords": ["new", "add", "create"]
-        },
-        "search_nodes": {
-          "description": "Search for information in the knowledge graph",
-          "keywords": ["find", "query", "search", "lookup"]
-        },
-        "add_observations": {
-          "description": "Add observations to existing entities",
-          "keywords": ["update", "append", "observe"]
-        },
-        "open_nodes": {
-          "description": "Open specific nodes by name",
-          "keywords": ["get", "retrieve", "load"]
-        },
-        "delete_entities": {
-          "description": "Delete entities from the knowledge graph",
-          "keywords": ["remove", "delete", "clear"]
-        }
-      }
-    },
     "time-precision": {
       "description": "High-precision time operations with microsecond accuracy",
       "keywords": ["time", "timestamp", "date", "clock", "precision", "microsecond", "epoch"],
