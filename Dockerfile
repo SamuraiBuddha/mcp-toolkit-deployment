@@ -1,5 +1,8 @@
 FROM python:3.10-slim
 
+# Fix for externally-managed-environment error
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
