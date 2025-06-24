@@ -15,11 +15,21 @@ WORKDIR /app
 RUN git clone https://github.com/SamuraiBuddha/mcp-orchestrator-proxy.git /app && \
     pip install -e .
 
-# Install Python-based MCPs
-RUN pip install \
-    mcp-memory-blockchain \
-    mcp-time-precision \
-    mcp-freshbooks-blockchain
+# Install Python-based MCPs from GitHub
+RUN git clone https://github.com/SamuraiBuddha/mcp-memory-blockchain.git /tmp/mcp-memory-blockchain && \
+    cd /tmp/mcp-memory-blockchain && \
+    pip install -e . && \
+    cd /app
+
+RUN git clone https://github.com/SamuraiBuddha/mcp-time-precision.git /tmp/mcp-time-precision && \
+    cd /tmp/mcp-time-precision && \
+    pip install -e . && \
+    cd /app
+
+RUN git clone https://github.com/SamuraiBuddha/mcp-freshbooks-blockchain.git /tmp/mcp-freshbooks-blockchain && \
+    cd /tmp/mcp-freshbooks-blockchain && \
+    pip install -e . && \
+    cd /app
 
 # Install Node.js-based MCPs
 RUN npm install -g \
