@@ -142,35 +142,6 @@
           "keywords": ["analyze", "decompose", "solve", "think"]
         }
       }
-    },
-    "freshbooks": {
-      "description": "Blockchain-powered accounting and financial management",
-      "keywords": ["invoice", "payment", "expense", "accounting", "finance", "blockchain", "audit", "tax"],
-      "categories": ["finance", "blockchain", "accounting"],
-      "command": "python",
-      "args": ["-m", "mcp_freshbooks_blockchain"],
-      "tools": {
-        "create_invoice": {
-          "description": "Create a new invoice with blockchain tracking",
-          "keywords": ["bill", "charge", "invoice"]
-        },
-        "list_invoices": {
-          "description": "List invoices with blockchain verification",
-          "keywords": ["show", "get", "unpaid"]
-        },
-        "record_payment": {
-          "description": "Record a payment with blockchain confirmation",
-          "keywords": ["paid", "received", "payment"]
-        },
-        "add_expense": {
-          "description": "Track an expense with immutable blockchain record",
-          "keywords": ["spend", "cost", "expense"]
-        },
-        "generate_report": {
-          "description": "Generate financial reports with blockchain verification",
-          "keywords": ["report", "profit", "loss", "tax"]
-        }
-      }
     }
   }
 }
