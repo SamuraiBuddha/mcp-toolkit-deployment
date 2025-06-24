@@ -8,7 +8,6 @@ volumes:
   mongodb_data:
   redis_data:
   portainer_data:
-  comfyui_data:
   minio_data:
 
 services:
@@ -88,26 +87,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
-
-  # ComfyUI - Using host network
-  comfyui:
-    image: yawnk/comfyui-boot:cu124-slim
-    container_name: comfyui
-    restart: unless-stopped
-    network_mode: "host"  # Use host network
-    volumes:
-      - comfyui_data:/root
-      - ./models:/root/ComfyUI/models
-      - ./output:/root/ComfyUI/output
-    environment:
-      - CLI_ARGS=""
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
   # MCP Orchestrator - Using host network
   mcp-orchestrator:
