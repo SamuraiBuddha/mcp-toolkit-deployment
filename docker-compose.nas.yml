@@ -1,0 +1,152 @@
+version: '3.8'
+
+volumes:
+  orchestrator_data:
+  neo4j_data:
+  postgres_data:
+  qdrant_data:
+  supabase_data:
+  minio_data:
+  keycloak_data:
+
+networks:
+  eva_network:
+    driver: overlay
+    attachable: true
+
+services:
+  # MCP Orchestrator Proxy - Central routing for all MCPs
+  mcp-orchestrator-proxy:
+    build: .
+    container_name: mcp-orchestrator-proxy
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - ./config:/app/config
+      - orchestrator_data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PYTHONPATH=/app
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    ports:
+      - "8080:8080"
+
+  # Neo4j - Graph Database for Memory
+  neo4j:
+    image: neo4j:5-community
+    container_name: neo4j-memory
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - neo4j_data:/data
+    environment:
+      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/password123}
+      - NEO4J_PLUGINS=["apoc"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+
+  # PostgreSQL - Relational Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-shared
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-shared}
+    ports:
+      - "5432:5432"
+
+  # Qdrant - Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant-vectors
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - "6333:6333"
+
+  # Supabase - Backend as a Service
+  supabase-db:
+    image: supabase/postgres:15.1.0.117
+    container_name: supabase-db
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - supabase_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${SUPABASE_DB_PASSWORD}
+      - POSTGRES_USER=supabase_admin
+      - POSTGRES_DB=postgres
+    ports:
+      - "5433:5432"
+
+  # MinIO - Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: minio-storage
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  # Keycloak - Identity and Access Management
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak-auth
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=postgres-shared
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_USERNAME=${POSTGRES_USER:-postgres}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+    command: start-dev
+    ports:
+      - "8085:8080"
+
+  # Traefik - API Gateway and Load Balancer
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik-gateway
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/etc/traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8090:8080"  # Traefik dashboard
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.network=eva_network"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
