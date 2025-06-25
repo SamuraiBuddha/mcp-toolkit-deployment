@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # EVA Network Dashboard - Runs on Melchior as control node
+  eva-dashboard:
+    build: ./dashboard
+    container_name: eva-network-dashboard
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    volumes:
+      # Mount SSH keys read-only
+      - ~/.ssh:/root/.ssh:ro
+      # Optional: Mount for custom node configs
+      - ./dashboard/config:/app/config
+    environment:
+      - NODE_ENV=production
+      - PORT=3333
+      # Path to SSH key inside container
+      - SSH_KEY_PATH=/root/.ssh/id_rsa
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.eva-dashboard.rule=Host(`eva.local`)"
+      - "traefik.http.services.eva-dashboard.loadbalancer.server.port=3333"
+
+  # Optional: Tachikoma Router Integration
+  tachikoma-integration:
+    image: node:18-alpine
+    container_name: tachikoma-router-api
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./tachikoma:/app
+    environment:
+      - ROUTER_IP=192.168.50.1
+      - ROUTER_TYPE=${ROUTER_TYPE:-auto}
+    command: npm start
+    ports:
+      - "3334:3000"
