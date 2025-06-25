@@ -1,0 +1,115 @@
+version: '3.8'
+
+volumes:
+  comfyui_data:
+  ollama_data:
+  localai_data:
+
+networks:
+  eva_network:
+    external: true
+
+services:
+  # ComfyUI - AI Image Generation (GPU Required)
+  comfyui:
+    image: yanwk/comfyui-boot:latest
+    container_name: comfyui-local
+    restart: unless-stopped
+    runtime: nvidia  # For NVIDIA GPU support
+    networks:
+      - eva_network
+    volumes:
+      - comfyui_data:/home/runner
+      - ./comfyui/models:/home/runner/ComfyUI/models
+      - ./comfyui/output:/home/runner/ComfyUI/output
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CLI_ARGS=--listen 0.0.0.0
+    ports:
+      - "8188:8188"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Ollama - Local LLM Runner (GPU Optimized)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-local
+    restart: unless-stopped
+    runtime: nvidia
+    networks:
+      - eva_network
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "11434:11434"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # LocalAI - OpenAI Compatible API (GPU Optimized)
+  localai:
+    image: localai/localai:latest-gpu-nvidia-cuda-12
+    container_name: localai-api
+    restart: unless-stopped
+    runtime: nvidia
+    networks:
+      - eva_network
+    volumes:
+      - localai_data:/build/models
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - THREADS=8
+      - CONTEXT_SIZE=8192
+      - GALLERIES=[{"name":"model-gallery","url":"github:go-skynet/model-gallery/index.yaml"}]
+    ports:
+      - "8089:8080"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # JetBrains MCP - IDE Integration (Desktop Specific)
+  jetbrains-mcp:
+    image: modelcontextprotocol/jetbrains:latest
+    container_name: jetbrains-mcp
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - ./jetbrains:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - MCP_MODE=local
+    ports:
+      - "3000:3000"
+
+  # Code Sandbox - Isolated Code Execution
+  code-sandbox:
+    image: codesandbox/sandpack-node:latest
+    container_name: code-sandbox
+    restart: unless-stopped
+    networks:
+      - eva_network
+    volumes:
+      - ./sandbox:/sandbox
+    environment:
+      - SANDBOX_MODE=secure
+    ports:
+      - "3001:3000"
+
+  # Desktop-specific MCPs can be added here
+  # These would include tools that need direct access to local resources
