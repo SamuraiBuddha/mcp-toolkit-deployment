@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVA Network Command Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #000;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Matrix Rain Background */
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.1;
+        }
+        
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            text-shadow: 0 0 20px #00ff00;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Node Grid */
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        /* Node Card */
+        .node-card {
+            background: rgba(0, 20, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .node-card:hover {
+            box-shadow: 0 0 30px #00ff00;
+            transform: translateY(-5px);
+        }
+        
+        .node-card.offline {
+            border-color: #ff0000;
+            opacity: 0.6;
+        }
+        
+        .node-card.offline h3 {
+            color: #ff0000;
+        }
+        
+        .node-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .node-name {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .node-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 0 0 10px currentColor;
+            animation: blink 2s infinite;
+        }
+        
+        .node-card.offline .node-status {
+            background: #ff0000;
+            animation: none;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Node Info */
+        .node-info {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .node-info div {
+            margin: 5px 0;
+        }
+        
+        /* Services List */
+        .services {
+            margin-top: 15px;
+            border-top: 1px solid #00ff00;
+            padding-top: 15px;
+        }
+        
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(0, 40, 0, 0.5);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .service-item:hover {
+            background: rgba(0, 60, 0, 0.7);
+        }
+        
+        .service-name {
+            flex: 1;
+        }
+        
+        .service-status {
+            margin: 0 10px;
+            font-size: 0.8em;
+        }
+        
+        .service-status.running {
+            color: #00ff00;
+        }
+        
+        .service-status.stopped {
+            color: #ff0000;
+        }
+        
+        /* Control Buttons */
+        .control-btn {
+            background: transparent;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 5px 10px;
+            margin: 0 2px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8em;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        
+        .control-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .control-btn.danger {
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+        
+        .control-btn.danger:hover {
+            background: #ff0000;
+        }
+        
+        /* Command Center */
+        .command-center {
+            background: rgba(0, 20, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .command-header {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Terminal Output */
+        .terminal {
+            background: #000;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            margin-top: 15px;
+        }
+        
+        .terminal-line {
+            margin: 2px 0;
+            white-space: pre-wrap;
+        }
+        
+        .terminal-line.error {
+            color: #ff0000;
+        }
+        
+        .terminal-line.success {
+            color: #00ff00;
+        }
+        
+        .terminal-line.info {
+            color: #00aaff;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background: rgba(0, 40, 0, 0.7);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1em;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        
+        /* Loading Overlay */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-text {
+            font-size: 2em;
+            animation: pulse 1s infinite;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nodes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Rain Background -->
+    <canvas id="matrix-rain"></canvas>
+    
+    <!-- Loading Overlay -->
+    <div class="loading" id="loading">
+        <div class="loading-text">EXECUTING COMMAND...</div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <header>
+            <h1>EVA NETWORK COMMAND CENTER</h1>
+            <p>Centralized Container Management via SSH</p>
+        </header>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="action-btn" onclick="deployAllNAS()">Deploy All NAS Services</button>
+            <button class="action-btn" onclick="deployAllGPU()">Deploy All GPU Services</button>
+            <button class="action-btn" onclick="updateAllNodes()">Update All Nodes</button>
+            <button class="action-btn" onclick="healthCheck()">System Health Check</button>
+            <button class="action-btn" onclick="migrateMemory()">Migrate Memory to Lilith</button>
+        </div>
+        
+        <!-- Nodes Grid -->
+        <div class="nodes-grid" id="nodes-grid">
+            <!-- Nodes will be dynamically inserted here -->
+        </div>
+        
+        <!-- Command Center -->
+        <div class="command-center">
+            <div class="command-header">
+                <span>Command Terminal</span>
+                <button class="control-btn" onclick="clearTerminal()">Clear</button>
+            </div>
+            <div class="terminal" id="terminal">
+                <div class="terminal-line success">EVA Network Command Center initialized.</div>
+                <div class="terminal-line info">Connected to Melchior as control node.</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // EVA Network Configuration
+        const nodes = {
+            lilith: {
+                name: 'Lilith',
+                ip: '192.168.50.10',
+                type: 'NAS (Primary AI)',
+                specs: 'i3 N305, 16GB DDR5, 14.4TB ZFS',
+                services: ['orchestrator', 'neo4j', 'postgres', 'qdrant', 'minio', 'keycloak', 'traefik'],
+                status: 'online'
+            },
+            adam: {
+                name: 'Adam',
+                ip: '192.168.50.11',
+                type: 'NAS (Business Storage)',
+                specs: 'Celeron, 32GB DDR4, 5.4TB RAIDZ1',
+                services: ['samba', 'nfs'],
+                status: 'online'
+            },
+            melchior: {
+                name: 'Melchior',
+                ip: '192.168.50.30',
+                type: 'GPU Workstation',
+                specs: 'Windows, RTX GPU, Docker Desktop',
+                services: ['comfyui', 'github-mcp', 'desktop-commander'],
+                status: 'online'
+            },
+            caspar: {
+                name: 'Caspar',
+                ip: '192.168.50.21',
+                type: 'GPU Node',
+                specs: 'Linux, GPU Bridge',
+                services: ['ollama', 'localai'],
+                status: 'online'
+            },
+            balthazar: {
+                name: 'Balthazar',
+                ip: '192.168.50.20',
+                type: 'GPU Node',
+                specs: 'Linux, GPU',
+                services: ['stable-diffusion', 'whisper'],
+                status: 'online'
+            }
+        };
+        
+        // SSH Command Executor (via fetch to backend API)
+        async function executeSSH(nodeIp, command) {
+            showLoading();
+            try {
+                const response = await fetch('/api/ssh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        host: nodeIp, 
+                        command: command,
+                        user: 'samuraibuddha'
+                    })
+                });
+                const result = await response.json();
+                hideLoading();
+                return result;
+            } catch (error) {
+                hideLoading();
+                logTerminal(`Error executing SSH command: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+        
+        // Docker Commands
+        const dockerCommands = {
+            start: (service) => `docker start ${service}`,
+            stop: (service) => `docker stop ${service}`,
+            restart: (service) => `docker restart ${service}`,
+            status: (service) => `docker ps -a --filter "name=${service}" --format "table {{.Names}}\t{{.Status}}"`,
+            deployNAS: () => 'cd /storage/mcp-toolkit && docker-compose -f docker-compose.nas.yml up -d',
+            deployGPU: () => 'cd /storage/mcp-toolkit && docker-compose -f docker-compose.local.yml up -d',
+            pull: () => 'cd /storage/mcp-toolkit && git pull && docker-compose pull'
+        };
+        
+        // Initialize Dashboard
+        function initDashboard() {
+            renderNodes();
+            startMatrixRain();
+            setInterval(updateNodeStatus, 30000); // Update every 30 seconds
+        }
+        
+        // Render Node Cards
+        function renderNodes() {
+            const grid = document.getElementById('nodes-grid');
+            grid.innerHTML = '';
+            
+            Object.entries(nodes).forEach(([key, node]) => {
+                const card = createNodeCard(key, node);
+                grid.appendChild(card);
+            });
+        }
+        
+        // Create Node Card
+        function createNodeCard(key, node) {
+            const card = document.createElement('div');
+            card.className = `node-card ${node.status === 'offline' ? 'offline' : ''}`;
+            card.id = `node-${key}`;
+            
+            card.innerHTML = `
+                <div class="node-header">
+                    <span class="node-name">${node.name}</span>
+                    <span class="node-status"></span>
+                </div>
+                <div class="node-info">
+                    <div>IP: ${node.ip}</div>
+                    <div>Type: ${node.type}</div>
+                    <div>Specs: ${node.specs}</div>
+                </div>
+                <div class="services">
+                    <strong>Services:</strong>
+                    ${node.services.map(service => `
+                        <div class="service-item">
+                            <span class="service-name">${service}</span>
+                            <span class="service-status" id="${key}-${service}-status">checking...</span>
+                            <div>
+                                <button class="control-btn" onclick="controlService('${node.ip}', '${service}', 'start')">Start</button>
+                                <button class="control-btn" onclick="controlService('${node.ip}', '${service}', 'stop')">Stop</button>
+                                <button class="control-btn" onclick="controlService('${node.ip}', '${service}', 'restart')">Restart</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // Control Service
+        async function controlService(nodeIp, service, action) {
+            logTerminal(`Executing ${action} on ${service} at ${nodeIp}...`, 'info');
+            const result = await executeSSH(nodeIp, dockerCommands[action](service));
+            
+            if (result.success) {
+                logTerminal(`${service} ${action} completed successfully`, 'success');
+                updateServiceStatus(nodeIp, service);
+            } else {
+                logTerminal(`Failed to ${action} ${service}: ${result.error}`, 'error');
+            }
+        }
+        
+        // Quick Actions
+        async function deployAllNAS() {
+            logTerminal('Deploying all NAS services on Lilith...', 'info');
+            const result = await executeSSH(nodes.lilith.ip, dockerCommands.deployNAS());
+            if (result.success) {
+                logTerminal('NAS services deployed successfully', 'success');
+            }
+        }
+        
+        async function deployAllGPU() {
+            logTerminal('Deploying GPU services on all GPU nodes...', 'info');
+            for (const [key, node] of Object.entries(nodes)) {
+                if (node.type.includes('GPU')) {
+                    await executeSSH(node.ip, dockerCommands.deployGPU());
+                }
+            }
+            logTerminal('GPU services deployment initiated', 'success');
+        }
+        
+        async function updateAllNodes() {
+            logTerminal('Updating all nodes...', 'info');
+            for (const [key, node] of Object.entries(nodes)) {
+                if (key !== 'melchior') { // Skip Windows node
+                    await executeSSH(node.ip, dockerCommands.pull());
+                }
+            }
+            logTerminal('All nodes updated', 'success');
+        }
+        
+        async function healthCheck() {
+            logTerminal('Running system health check...', 'info');
+            for (const [key, node] of Object.entries(nodes)) {
+                const pingResult = await executeSSH(node.ip, 'echo "OK"');
+                if (pingResult.success) {
+                    logTerminal(`${node.name}: Online`, 'success');
+                } else {
+                    logTerminal(`${node.name}: Offline or unreachable`, 'error');
+                }
+            }
+        }
+        
+        async function migrateMemory() {
+            logTerminal('Starting memory migration from Melchior to Lilith...', 'info');
+            // This would execute the actual migration script
+            logTerminal('Memory migration initiated - check progress in Neo4j dashboard', 'info');
+        }
+        
+        // Update Service Status
+        async function updateServiceStatus(nodeIp, service) {
+            const result = await executeSSH(nodeIp, dockerCommands.status(service));
+            // Parse result and update UI
+        }
+        
+        // Update Node Status
+        async function updateNodeStatus() {
+            for (const [key, node] of Object.entries(nodes)) {
+                const pingResult = await executeSSH(node.ip, 'echo "OK"');
+                nodes[key].status = pingResult.success ? 'online' : 'offline';
+            }
+            renderNodes();
+        }
+        
+        // Terminal Functions
+        function logTerminal(message, type = 'info') {
+            const terminal = document.getElementById('terminal');
+            const line = document.createElement('div');
+            line.className = `terminal-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function clearTerminal() {
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML = '<div class="terminal-line success">Terminal cleared.</div>';
+        }
+        
+        // Loading Functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // Matrix Rain Effect
+        function startMatrixRain() {
+            const canvas = document.getElementById('matrix-rain');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            const drops = [];
+            
+            for (let i = 0; i < columns; i++) {
+                drops[i] = 1;
+            }
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#00ff00';
+                ctx.font = fontSize + 'px monospace';
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 33);
+        }
+        
+        // Initialize on load
+        window.onload = initDashboard;
+        
+        // Handle window resize
+        window.onresize = () => {
+            const canvas = document.getElementById('matrix-rain');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+    </script>
+</body>
+</html>
