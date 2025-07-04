@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "lilith_dev": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "//YOUR_SERVER_IP/development"
+      ]
+    },
+    "lilith_ai": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem", 
+        "//YOUR_SERVER_IP/ai-models"
+      ]
+    },
+    "lilith_media": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "//YOUR_SERVER_IP/media"
+      ]
+    },
+    "lilith_backups": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "//YOUR_SERVER_IP/backups"
+      ]
+    },
+    "current_nas": {
+      "command": "npx", 
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "//YOUR_NAS_HOSTNAME/public"
+      ]
+    },
+    "old_nas": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "//YOUR_OLD_NAS/Public"
+      ]
+    }
+  }
+}
