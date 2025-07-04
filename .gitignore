@@ -1,0 +1,119 @@
+# MCP Toolkit Deployment - Comprehensive .gitignore
+
+# Environment & Secrets (CRITICAL EXCLUSIONS)
+.env*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+config/secrets/
+private/
+auth/
+credentials/
+
+# Claude Desktop Config (SECURITY CRITICAL)
+claude_desktop_config.json
+*claude_desktop_config*.json
+!claude_desktop_config.json.template
+!claude_desktop_config.json.example
+
+# Docker & Container
+.docker/
+docker-data/
+*.tar
+*.tar.gz
+volumes/
+container-data/
+
+# Shell Scripts with Secrets
+*.env.sh
+*secrets*.sh
+*-credentials.sh
+
+# Logs & Runtime
+logs/
+*.log
+pid
+*.pid
+*.seed
+*.pid.lock
+runtime/
+temp-logs/
+
+# Build outputs
+dist/
+build/
+out/
+.cache/
+.parcel-cache/
+
+# IDE & OS
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backup files
+backup/
+*.bak
+*.backup
+*.old
+*.orig
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+.temp/
+
+# OS specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Network configs with sensitive data
+*network*.json
+*server*.json
+*hosts*.json
+*endpoints*.json
+
+# Database
+*.db
+*.sqlite
+*.sql
+data/
+db/
+
+# Certificates & Keys
+*.crt
+*.cer
+*.der
+*.p7b
+*.p7c
+*.p7s
+*.pfx
+*.p12
+*.key
+*.pem
+*.csr
+
+# Deployment configs with sensitive info
+*production*.env
+*staging*.env
+*deployment*.env
+deploy-config.json
+infrastructure.json
